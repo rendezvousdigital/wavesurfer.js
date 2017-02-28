@@ -4,7 +4,7 @@
     define('wavesurfer', [], function () {
       return (root['WaveSurfer'] = factory());
     });
-  } else if (typeof exports === 'object') {
+  } else if (typeof module === 'object' && module.exports) {
     // Node. Does not work with strict CommonJS, but
     // only CommonJS-like environments that support module.exports,
     // like Node.
@@ -1692,7 +1692,9 @@ WaveSurfer.util.extend(WaveSurfer.Drawer.Canvas, {
 
         var absmax = 1;
         if (this.params.normalize) {
-            absmax = WaveSurfer.util.max(peaks);
+            var max = WaveSurfer.util.max(peaks);
+            var min = WaveSurfer.util.min(peaks);
+            absmax = -min > max ? -min : max;
         }
 
         var scale = length / width;
@@ -1969,7 +1971,9 @@ WaveSurfer.util.extend(WaveSurfer.Drawer.MultiCanvas, {
 
         var absmax = 1;
         if (this.params.normalize) {
-            absmax = WaveSurfer.util.max(peaks);
+            var max = WaveSurfer.util.max(peaks);
+            var min = WaveSurfer.util.min(peaks);
+            absmax = -min > max ? -min : max;
         }
 
         var scale = length / width;
