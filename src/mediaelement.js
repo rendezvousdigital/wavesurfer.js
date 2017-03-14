@@ -201,6 +201,7 @@ WaveSurfer.util.extend(WaveSurfer.MediaElement, {
         if (this.buffer) {
             return WaveSurfer.WebAudio.getPeaks.call(this, length);
         }
+
         return this.peaks || [];
     },
 

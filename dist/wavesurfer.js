@@ -87,6 +87,8 @@ var WaveSurfer = {
         this.createBackend();
 
         this.isDestroyed = false;
+
+        this.peaksDownloaded = false;
     },
 
     createDrawer: function () {
@@ -284,9 +286,24 @@ var WaveSurfer = {
             width = parentWidth;
         }
 
-        var peaks = this.backend.getPeaks(width);
-        this.drawer.drawPeaks(peaks, width);
-        this.fireEvent('redraw', peaks, width);
+        var b = this.backend;
+        var d = this.drawer;
+        var t = this;
+
+        if (typeof b.peaks != 'undefined' && !this.peaksDownloaded) {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.onreadystatechange = function() {
+                if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+                    var response = JSON.parse(xmlHttp.responseText);
+                    d.drawPeaks(response.data, width);
+                    t.fireEvent('redraw', response.data, width);
+                    t.peaksDownloaded = true;
+                }
+            };
+
+            xmlHttp.open('GET', b.peaks, true);
+            xmlHttp.send(null);
+        }
     },
 
     zoom: function (pxPerSec) {
@@ -1354,6 +1371,7 @@ WaveSurfer.util.extend(WaveSurfer.MediaElement, {
         if (this.buffer) {
             return WaveSurfer.WebAudio.getPeaks.call(this, length);
         }
+
         return this.peaks || [];
     },
 
