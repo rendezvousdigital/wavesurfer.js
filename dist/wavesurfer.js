@@ -87,8 +87,6 @@ var WaveSurfer = {
         this.createBackend();
 
         this.isDestroyed = false;
-
-        this.peaksDownloaded = false;
     },
 
     createDrawer: function () {
@@ -290,14 +288,13 @@ var WaveSurfer = {
         var d = this.drawer;
         var t = this;
 
-        if (typeof b.peaks != 'undefined' && !this.peaksDownloaded) {
+        if (typeof b.peaks != 'undefined') {
             var xmlHttp = new XMLHttpRequest();
             xmlHttp.onreadystatechange = function() {
                 if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
                     var response = JSON.parse(xmlHttp.responseText);
                     d.drawPeaks(response.data, width);
                     t.fireEvent('redraw', response.data, width);
-                    t.peaksDownloaded = true;
                 }
             };
 
