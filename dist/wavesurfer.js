@@ -1723,7 +1723,7 @@ WaveSurfer.util.extend(WaveSurfer.Drawer.Canvas, {
             if (!cc) { return; }
 
             for (var i = 0; i < width; i += step) {
-                var h = Math.round(peaks[Math.floor(i * scale)] / absmax * halfH);
+                var h = Math.round(peaks[Math.floor(i * scale)] / absmax * halfH) + 1;
                 cc.fillRect(i + $, halfH - h + offsetY, bar + $, h * 2);
             }
         }, this);
@@ -1994,7 +1994,7 @@ WaveSurfer.util.extend(WaveSurfer.Drawer.MultiCanvas, {
         var scale = length / width;
 
         for (var i = 0; i < width; i += step) {
-            var h = Math.round(peaks[Math.floor(i * scale)] / absmax * halfH);
+            var h = Math.round(peaks[Math.floor(i * scale)] / absmax * halfH) + 1;
             this.fillRect(i + this.halfPixel, halfH - h + offsetY, bar + this.halfPixel, h * 2);
         }
     },
