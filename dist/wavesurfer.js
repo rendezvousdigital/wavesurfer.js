@@ -4,7 +4,7 @@
     define('wavesurfer', [], function () {
       return (root['WaveSurfer'] = factory());
     });
-  } else if (typeof exports === 'object') {
+  } else if (typeof module === 'object' && module.exports) {
     // Node. Does not work with strict CommonJS, but
     // only CommonJS-like environments that support module.exports,
     // like Node.
@@ -332,19 +332,23 @@ var WaveSurfer = {
             end = width;
         }
 
-        if (this.params.partialRender) {
-            var newRanges = this.peakCache.addRangeToPeakCache(width, start, end);
-            for (var i = 0; i < newRanges.length; i++) {
-              var peaks = this.backend.getPeaks(width, newRanges[i][0], newRanges[i][1]);
-              this.drawer.drawPeaks(peaks, width, newRanges[i][0], newRanges[i][1]);
-            }
-        } else {
-            start = 0;
-            end = width;
-            var peaks = this.backend.getPeaks(width, start, end);
-            this.drawer.drawPeaks(peaks, width, start, end);
+        var b = this.backend;
+        var d = this.drawer;
+        var t = this;
+
+        if (typeof b.peaks != 'undefined') {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.onreadystatechange = function() {
+                if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+                    var response = JSON.parse(xmlHttp.responseText);
+                    d.drawPeaks(response.data, width);
+                    t.fireEvent('redraw', response.data, width);
+                }
+            };
+
+            xmlHttp.open('GET', b.peaks, true);
+            xmlHttp.send(null);
         }
-        this.fireEvent('redraw', peaks, width);
     },
 
     zoom: function (pxPerSec) {
@@ -1324,22 +1328,25 @@ WaveSurfer.util.extend(WaveSurfer.MediaElement, {
      *  @param  {String}        preload     HTML 5 preload attribute value
      */
     load: function (url, container, peaks, preload) {
-        var my = this;
+      var my    = this;
+      var media = null;
 
-        var media = document.createElement(this.mediaType);
+      var prevMedia = container.querySelector(this.mediaType);
+      if (prevMedia) {
+          prevMedia.src = url;
+          var media = prevMedia;
+      } else {
+        media = document.createElement(this.mediaType);
         media.controls = this.params.mediaControls;
         media.autoplay = this.params.autoplay || false;
         media.preload = preload == null ? 'auto' : preload;
         media.src = url;
         media.style.width = '100%';
 
-        var prevMedia = container.querySelector(this.mediaType);
-        if (prevMedia) {
-            container.removeChild(prevMedia);
-        }
         container.appendChild(media);
+      }
 
-        this._load(media, peaks);
+      this._load(media, peaks);
     },
 
     /**
@@ -1421,7 +1428,7 @@ WaveSurfer.util.extend(WaveSurfer.MediaElement, {
     },
 
     seekTo: function (start) {
-        if (start != null) {
+        if (start != null && !isNaN(start)) {
             this.media.currentTime = start;
         }
         this.clearPlayEnd();
@@ -1473,6 +1480,7 @@ WaveSurfer.util.extend(WaveSurfer.MediaElement, {
         if (this.buffer) {
             return WaveSurfer.WebAudio.getPeaks.call(this, length, start, end);
         }
+
         return this.peaks || [];
     },
 
@@ -1838,9 +1846,8 @@ WaveSurfer.util.extend(WaveSurfer.Drawer.Canvas, {
         [ this.waveCc, this.progressCc ].forEach(function (cc) {
             if (!cc) { return; }
 
-            for (var i = (start / scale); i < (end / scale); i += step) {
-                var peak = peaks[Math.floor(i * scale * peakIndexScale)] || 0;
-                var h = Math.round(peak / absmax * halfH);
+            for (var i = 0; i < width; i += step) {
+                var h = Math.round(peaks[Math.floor(i * scale)] / absmax * halfH) + 1;
                 cc.fillRect(i + $, halfH - h + offsetY, bar + $, h * 2);
             }
         }, this);
@@ -2115,9 +2122,8 @@ WaveSurfer.util.extend(WaveSurfer.Drawer.MultiCanvas, {
 
         var scale = length / width;
 
-        for (var i = (start / scale); i < (end / scale); i += step) {
-            var peak = peaks[Math.floor(i * scale * peakIndexScale)] || 0;
-            var h = Math.round(peak / absmax * halfH);
+        for (var i = 0; i < width; i += step) {
+            var h = Math.round(peaks[Math.floor(i * scale)] / absmax * halfH) + 1;
             this.fillRect(i + this.halfPixel, halfH - h + offsetY, bar + this.halfPixel, h * 2);
         }
     },
