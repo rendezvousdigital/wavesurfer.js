@@ -52,22 +52,25 @@ WaveSurfer.util.extend(WaveSurfer.MediaElement, {
      *  @param  {String}        preload     HTML 5 preload attribute value
      */
     load: function (url, container, peaks, preload) {
-        var my = this;
+      var my    = this;
+      var media = null;
 
-        var media = document.createElement(this.mediaType);
+      var prevMedia = container.querySelector(this.mediaType);
+      if (prevMedia) {
+          prevMedia.src = url;
+          var media = prevMedia;
+      } else {
+        media = document.createElement(this.mediaType);
         media.controls = this.params.mediaControls;
         media.autoplay = this.params.autoplay || false;
         media.preload = preload == null ? 'auto' : preload;
         media.src = url;
         media.style.width = '100%';
 
-        var prevMedia = container.querySelector(this.mediaType);
-        if (prevMedia) {
-            container.removeChild(prevMedia);
-        }
         container.appendChild(media);
+      }
 
-        this._load(media, peaks);
+      this._load(media, peaks);
     },
 
     /**
@@ -149,7 +152,7 @@ WaveSurfer.util.extend(WaveSurfer.MediaElement, {
     },
 
     seekTo: function (start) {
-        if (start != null) {
+        if (start != null && !isNaN(start)) {
             this.media.currentTime = start;
         }
         this.clearPlayEnd();
