@@ -118,9 +118,8 @@ WaveSurfer.util.extend(WaveSurfer.Drawer.Canvas, {
         [ this.waveCc, this.progressCc ].forEach(function (cc) {
             if (!cc) { return; }
 
-            for (var i = (start / scale); i < (end / scale); i += step) {
-                var peak = peaks[Math.floor(i * scale * peakIndexScale)] || 0;
-                var h = Math.round(peak / absmax * halfH);
+            for (var i = 0; i < width; i += step) {
+                var h = Math.round(peaks[Math.floor(i * scale)] / absmax * halfH) + 1;
                 cc.fillRect(i + $, halfH - h + offsetY, bar + $, h * 2);
             }
         }, this);

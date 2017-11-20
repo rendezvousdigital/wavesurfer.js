@@ -181,9 +181,8 @@ WaveSurfer.util.extend(WaveSurfer.Drawer.MultiCanvas, {
 
         var scale = length / width;
 
-        for (var i = (start / scale); i < (end / scale); i += step) {
-            var peak = peaks[Math.floor(i * scale * peakIndexScale)] || 0;
-            var h = Math.round(peak / absmax * halfH);
+        for (var i = 0; i < width; i += step) {
+            var h = Math.round(peaks[Math.floor(i * scale)] / absmax * halfH) + 1;
             this.fillRect(i + this.halfPixel, halfH - h + offsetY, bar + this.halfPixel, h * 2);
         }
     },

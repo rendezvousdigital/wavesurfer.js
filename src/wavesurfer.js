@@ -324,19 +324,23 @@ var WaveSurfer = {
             end = width;
         }
 
-        if (this.params.partialRender) {
-            var newRanges = this.peakCache.addRangeToPeakCache(width, start, end);
-            for (var i = 0; i < newRanges.length; i++) {
-              var peaks = this.backend.getPeaks(width, newRanges[i][0], newRanges[i][1]);
-              this.drawer.drawPeaks(peaks, width, newRanges[i][0], newRanges[i][1]);
-            }
-        } else {
-            start = 0;
-            end = width;
-            var peaks = this.backend.getPeaks(width, start, end);
-            this.drawer.drawPeaks(peaks, width, start, end);
+        var b = this.backend;
+        var d = this.drawer;
+        var t = this;
+
+        if (typeof b.peaks != 'undefined') {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.onreadystatechange = function() {
+                if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+                    var response = JSON.parse(xmlHttp.responseText);
+                    d.drawPeaks(response.data, width);
+                    t.fireEvent('redraw', response.data, width);
+                }
+            };
+
+            xmlHttp.open('GET', b.peaks, true);
+            xmlHttp.send(null);
         }
-        this.fireEvent('redraw', peaks, width);
     },
 
     zoom: function (pxPerSec) {
