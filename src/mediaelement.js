@@ -63,6 +63,7 @@ WaveSurfer.util.extend(WaveSurfer.MediaElement, {
 
       var prevMedia = container.querySelector(this.mediaType);
       if (prevMedia) {
+          media.volume      = prevMedia.volume;
           prevMedia.preload = 'none';
           container.removeChild(prevMedia);
       }
