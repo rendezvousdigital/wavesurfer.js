@@ -336,21 +336,27 @@ var WaveSurfer = {
         var d = this.drawer;
         var t = this;
 
-        if (typeof b.peaks != 'undefined' && !(b.peaks instanceof Array)) {
-            var xmlHttp = new XMLHttpRequest();
-            xmlHttp.onreadystatechange = function() {
-                if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-                    var response = JSON.parse(xmlHttp.responseText);
-                    b.peaks      = response.data;
+        if (typeof b.peaks != 'undefined') {
+            if(b.peaks instanceof Array) {
+              d.drawPeaks(b.peaks, width);
+              t.fireEvent('redraw', b.peaks, width);
+            }
+            else {
+              var xmlHttp = new XMLHttpRequest();
+              xmlHttp.onreadystatechange = function() {
+                  if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+                      var response = JSON.parse(xmlHttp.responseText);
+                      b.peaks      = response.data;
 
-                    d.drawPeaks(b.peaks, width);
-                    t.fireEvent('redraw', b.peaks, width);
-                    t.fireEvent('ready');
-                }
-            };
+                      d.drawPeaks(b.peaks, width);
+                      t.fireEvent('redraw', b.peaks, width);
+                      t.fireEvent('ready');
+                  }
+              };
 
-            xmlHttp.open('GET', b.peaks, true);
-            xmlHttp.send(null);
+              xmlHttp.open('GET', b.peaks, true);
+              xmlHttp.send(null);
+            }
         }
     },
 
