@@ -333,8 +333,11 @@ var WaveSurfer = {
             xmlHttp.onreadystatechange = function() {
                 if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
                     var response = JSON.parse(xmlHttp.responseText);
-                    d.drawPeaks(response.data, width);
-                    t.fireEvent('redraw', response.data, width);
+                    b.peaks      = response.data;
+
+                    d.drawPeaks(b.peaks, width);
+                    t.fireEvent('redraw', b.peaks, width);
+                    t.fireEvent('ready');
                 }
             };
 
@@ -457,7 +460,7 @@ var WaveSurfer = {
         this.tmpEvents.push(
             this.backend.once('canplay', (function () {
                 this.drawBuffer();
-                this.fireEvent('ready');
+                // this.fireEvent('ready'); Move in drawBuffer in order to fire it after AJAX response (real draw)
             }).bind(this)),
 
             this.backend.once('error', (function (err) {
