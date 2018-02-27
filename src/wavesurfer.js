@@ -328,7 +328,7 @@ var WaveSurfer = {
         var d = this.drawer;
         var t = this;
 
-        if (typeof b.peaks != 'undefined') {
+        if (typeof b.peaks != 'undefined' && !(b.peaks instanceof Array)) {
             var xmlHttp = new XMLHttpRequest();
             xmlHttp.onreadystatechange = function() {
                 if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
